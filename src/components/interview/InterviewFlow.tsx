@@ -246,6 +246,9 @@ export function InterviewFlow() {
             </button>
           </div>
         )}
+        <Link to="/review" className="font-mono text-[10px] uppercase tracking-widest text-primary">
+          Review sessions
+        </Link>
       </header>
 
       <div className="mx-auto max-w-5xl">
@@ -257,10 +260,19 @@ export function InterviewFlow() {
               setTopic(t);
               setIndex(0);
               setAnswers([]);
+              setEvents([]);
+              tabSwitchRef.current = 0;
+              sessionId.current = null;
+              void createSession(t.name)
+                .then((id) => {
+                  sessionId.current = id;
+                })
+                .catch(() => undefined);
               setStage("share");
             }}
           />
         )}
+
 
         {stage === "share" && (
           <div className="mx-auto max-w-xl rounded-3xl border border-border bg-card p-8">
