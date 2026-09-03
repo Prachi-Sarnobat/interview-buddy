@@ -4,9 +4,10 @@ export interface Question {
   id: string;
   text: string;
   difficulty: Difficulty;
+  stage: string;
 }
 
-export interface Topic {
+export interface InterviewStage {
   id: string;
   name: string;
   blurb: string;
@@ -26,15 +27,26 @@ export interface AnswerRecord {
   evaluation: Evaluation;
 }
 
-export const TOPICS: Topic[] = [
+/** Fixed full-stack interview sequence — always in this order. */
+export const INTERVIEW_STAGES: InterviewStage[] = [
+  {
+    id: "htmlcss",
+    name: "HTML & CSS",
+    blurb: "Semantics, layout, responsive design",
+    questions: [
+      { id: "h1", stage: "HTML & CSS", text: "What does semantic HTML mean, and why does it matter?", difficulty: "Easy" },
+      { id: "h2", stage: "HTML & CSS", text: "Explain the difference between Flexbox and CSS Grid, and when you would use each.", difficulty: "Medium" },
+      { id: "h3", stage: "HTML & CSS", text: "How would you debug and fix a layout that breaks on small screens?", difficulty: "Hard" },
+    ],
+  },
   {
     id: "react",
-    name: "React",
+    name: "React.js",
     blurb: "Hooks, rendering, state",
     questions: [
-      { id: "r1", text: "Explain the difference between state and props in React.", difficulty: "Easy" },
-      { id: "r2", text: "How does the useEffect dependency array affect when an effect runs?", difficulty: "Medium" },
-      { id: "r3", text: "How would you diagnose and fix unnecessary re-renders in a large React tree?", difficulty: "Hard" },
+      { id: "r1", stage: "React.js", text: "Explain the difference between state and props in React.", difficulty: "Easy" },
+      { id: "r2", stage: "React.js", text: "How does the useEffect dependency array affect when an effect runs?", difficulty: "Medium" },
+      { id: "r3", stage: "React.js", text: "How would you diagnose and fix unnecessary re-renders in a large React tree?", difficulty: "Hard" },
     ],
   },
   {
@@ -42,32 +54,24 @@ export const TOPICS: Topic[] = [
     name: "Python",
     blurb: "Core language and idioms",
     questions: [
-      { id: "p1", text: "What is the difference between a list and a tuple in Python?", difficulty: "Easy" },
-      { id: "p2", text: "Explain how decorators work and give a practical use case.", difficulty: "Medium" },
-      { id: "p3", text: "How does the Global Interpreter Lock affect concurrency choices in Python?", difficulty: "Hard" },
+      { id: "p1", stage: "Python", text: "What is the difference between a list and a tuple in Python?", difficulty: "Easy" },
+      { id: "p2", stage: "Python", text: "Explain how decorators work and give a practical use case.", difficulty: "Medium" },
+      { id: "p3", stage: "Python", text: "How does the Global Interpreter Lock affect concurrency choices in Python?", difficulty: "Hard" },
     ],
   },
   {
-    id: "django",
-    name: "Django",
-    blurb: "ORM, views, REST",
+    id: "backend",
+    name: "Node.js, PostgreSQL & Django",
+    blurb: "APIs, data modelling, performance",
     questions: [
-      { id: "d1", text: "What does the Django ORM do, and how do you define a model?", difficulty: "Easy" },
-      { id: "d2", text: "How do you avoid N+1 queries in Django with select_related and prefetch_related?", difficulty: "Medium" },
-      { id: "d3", text: "How would you design authentication and permissions for a Django REST API?", difficulty: "Hard" },
-    ],
-  },
-  {
-    id: "sql",
-    name: "SQL",
-    blurb: "Joins, indexes, tuning",
-    questions: [
-      { id: "s1", text: "What is the difference between an INNER JOIN and a LEFT JOIN?", difficulty: "Easy" },
-      { id: "s2", text: "When would you use a window function instead of a GROUP BY?", difficulty: "Medium" },
-      { id: "s3", text: "How do you diagnose a slow query and decide which indexes to add?", difficulty: "Hard" },
+      { id: "b1", stage: "Node.js, PostgreSQL & Django", text: "How does the Node.js event loop handle asynchronous work?", difficulty: "Easy" },
+      { id: "b2", stage: "Node.js, PostgreSQL & Django", text: "In PostgreSQL, when would you add an index, and what does it cost you?", difficulty: "Medium" },
+      { id: "b3", stage: "Node.js, PostgreSQL & Django", text: "How would you design authentication and permissions for a Django REST API?", difficulty: "Hard" },
     ],
   },
 ];
+
+export const ALL_QUESTIONS: Question[] = INTERVIEW_STAGES.flatMap((s) => s.questions);
 
 const STRENGTHS = [
   "Clear structure — you led with a definition before the example.",
@@ -105,6 +109,6 @@ export function evaluateAnswer(_question: Question, transcript: string): Promise
         strengths: pick(STRENGTHS, 2),
         improvements: pick(IMPROVEMENTS, 2),
       });
-    }, 1600);
+    }, 1200);
   });
 }
