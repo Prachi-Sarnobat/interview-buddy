@@ -14,7 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      interview_sessions: {
+        Row: {
+          candidate_label: string | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          screen_share_active: boolean
+          started_at: string
+          tab_switch_count: number
+          topic: string
+        }
+        Insert: {
+          candidate_label?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          screen_share_active?: boolean
+          started_at?: string
+          tab_switch_count?: number
+          topic: string
+        }
+        Update: {
+          candidate_label?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          screen_share_active?: boolean
+          started_at?: string
+          tab_switch_count?: number
+          topic?: string
+        }
+        Relationships: []
+      }
+      proctoring_events: {
+        Row: {
+          event_type: string
+          id: string
+          label: string
+          occurred_at: string
+          session_id: string
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          label: string
+          occurred_at?: string
+          session_id: string
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          label?: string
+          occurred_at?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "interview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
