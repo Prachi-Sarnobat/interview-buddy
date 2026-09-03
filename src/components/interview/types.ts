@@ -83,7 +83,7 @@ const IMPROVEMENTS = [
   "Quantify impact where you can (latency, queries saved, bundle size).",
 ];
 
-const VERDICTS: Record<string, string> = {
+const VERDICTS = {
   low: "Right idea, needs more depth",
   mid: "Solid answer with room to sharpen",
   high: "Strong, interview-ready answer",
