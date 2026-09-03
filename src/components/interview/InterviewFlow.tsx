@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { ConsentScreen } from "./ConsentScreen";
 import { TopicSelect } from "./TopicSelect";
 import { WebcamTile } from "./WebcamTile";
 import { QuestionCard } from "./QuestionCard";
 import { ScoreRing } from "./ScoreRing";
 import { evaluateAnswer, type AnswerRecord, type Evaluation, type Topic } from "./types";
+import {
+  createSession,
+  logProctoringEvent,
+  updateSession,
+  type ProctoringEventType,
+} from "@/lib/proctoring";
+
 
 type Stage = "consent" | "topic" | "share" | "interview" | "summary";
 type Phase = "speaking" | "listening" | "evaluating" | "feedback";
