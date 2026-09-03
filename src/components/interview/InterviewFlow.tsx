@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { ConsentScreen } from "./ConsentScreen";
 import { TopicSelect } from "./TopicSelect";
 import { WebcamTile } from "./WebcamTile";
 import { QuestionCard } from "./QuestionCard";
 import { ScoreRing } from "./ScoreRing";
 import { evaluateAnswer, type AnswerRecord, type Evaluation, type Topic } from "./types";
+import {
+  createSession,
+  logProctoringEvent,
+  updateSession,
+  type ProctoringEventType,
+} from "@/lib/proctoring";
+
 
 type Stage = "consent" | "topic" | "share" | "interview" | "summary";
 type Phase = "speaking" | "listening" | "evaluating" | "feedback";
@@ -25,6 +33,8 @@ export function InterviewFlow() {
   const [shareError, setShareError] = useState<string | null>(null);
   const [events, setEvents] = useState<{ label: string; at: string }[]>([]);
   const shareStream = useRef<MediaStream | null>(null);
+  const sessionId = useRef<string | null>(null);
+  const tabSwitchRef = useRef(0);
 
   const recognitionRef = useRef<any>(null);
   const silenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -34,17 +44,27 @@ export function InterviewFlow() {
 
   const question = topic?.questions[index] ?? null;
 
-  const logEvent = useCallback((label: string) => {
+  const logEvent = useCallback((type: ProctoringEventType, label: string) => {
     setEvents((e) => [...e, { label, at: new Date().toLocaleTimeString() }]);
+    const id = sessionId.current;
+    if (!id) return;
+    void logProctoringEvent(id, type, label).catch(() => undefined);
+    if (type === "tab_switch") {
+      tabSwitchRef.current += 1;
+      void updateSession(id, { tab_switch_count: tabSwitchRef.current }).catch(() => undefined);
+    }
+    if (type === "share_started" || type === "share_stopped") {
+      void updateSession(id, { screen_share_active: type === "share_started" }).catch(() => undefined);
+    }
   }, []);
 
   /* ---------- proctoring: tab switch / blur ---------- */
   useEffect(() => {
     if (stage !== "interview") return;
     const onVis = () => {
-      if (document.visibilityState === "hidden") logEvent("Switched away from the interview tab");
+      if (document.visibilityState === "hidden") logEvent("tab_switch", "Switched away from the interview tab");
     };
-    const onBlur = () => logEvent("Interview window lost focus");
+    const onBlur = () => logEvent("window_blur", "Interview window lost focus");
     document.addEventListener("visibilitychange", onVis);
     window.addEventListener("blur", onBlur);
     return () => {
@@ -60,11 +80,11 @@ export function InterviewFlow() {
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
       shareStream.current = stream;
       setSharing(true);
-      logEvent("Screen sharing started");
+      logEvent("share_started", "Screen sharing started");
       stream.getVideoTracks()[0]?.addEventListener("ended", () => {
         setSharing(false);
         shareStream.current = null;
-        logEvent("Screen sharing stopped");
+        logEvent("share_stopped", "Screen sharing stopped");
       });
     } catch {
       setShareError("Screen sharing was not allowed. You can continue without it.");
@@ -72,11 +92,13 @@ export function InterviewFlow() {
   };
 
   const stopShare = () => {
+    if (!shareStream.current && !sharing) return;
     shareStream.current?.getTracks().forEach((t) => t.stop());
     shareStream.current = null;
     setSharing(false);
-    logEvent("Screen sharing stopped");
+    logEvent("share_stopped", "Screen sharing stopped");
   };
+
 
   /* ---------- speech ---------- */
   const stopRecognition = useCallback(() => {
@@ -179,6 +201,9 @@ export function InterviewFlow() {
       setPhase("speaking");
     } else {
       window.speechSynthesis?.cancel();
+      if (sessionId.current) {
+        void updateSession(sessionId.current, { ended_at: new Date().toISOString() }).catch(() => undefined);
+      }
       setStage("summary");
     }
   };
@@ -187,6 +212,8 @@ export function InterviewFlow() {
     stopRecognition();
     window.speechSynthesis?.cancel();
     stopShare();
+    sessionId.current = null;
+    tabSwitchRef.current = 0;
     setTopic(null);
     setIndex(0);
     setAnswers([]);
@@ -198,6 +225,7 @@ export function InterviewFlow() {
   };
 
   const tabSwitches = events.filter((e) => e.label.startsWith("Switched")).length;
+
 
   return (
     <main className="min-h-screen bg-background px-4 py-10 sm:px-8">
@@ -218,6 +246,9 @@ export function InterviewFlow() {
             </button>
           </div>
         )}
+        <Link to="/review" className="font-mono text-[10px] uppercase tracking-widest text-primary">
+          Review sessions
+        </Link>
       </header>
 
       <div className="mx-auto max-w-5xl">
@@ -229,10 +260,19 @@ export function InterviewFlow() {
               setTopic(t);
               setIndex(0);
               setAnswers([]);
+              setEvents([]);
+              tabSwitchRef.current = 0;
+              sessionId.current = null;
+              void createSession(t.name)
+                .then((id) => {
+                  sessionId.current = id;
+                })
+                .catch(() => undefined);
               setStage("share");
             }}
           />
         )}
+
 
         {stage === "share" && (
           <div className="mx-auto max-w-xl rounded-3xl border border-border bg-card p-8">
