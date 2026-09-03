@@ -201,6 +201,9 @@ export function InterviewFlow() {
       setPhase("speaking");
     } else {
       window.speechSynthesis?.cancel();
+      if (sessionId.current) {
+        void updateSession(sessionId.current, { ended_at: new Date().toISOString() }).catch(() => undefined);
+      }
       setStage("summary");
     }
   };
@@ -209,6 +212,8 @@ export function InterviewFlow() {
     stopRecognition();
     window.speechSynthesis?.cancel();
     stopShare();
+    sessionId.current = null;
+    tabSwitchRef.current = 0;
     setTopic(null);
     setIndex(0);
     setAnswers([]);
@@ -220,6 +225,7 @@ export function InterviewFlow() {
   };
 
   const tabSwitches = events.filter((e) => e.label.startsWith("Switched")).length;
+
 
   return (
     <main className="min-h-screen bg-background px-4 py-10 sm:px-8">
