@@ -1,5 +1,7 @@
 const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
-const API_URL = configuredApiUrl ? configuredApiUrl.replace(/\/$/, "") : "";
+const API_URL = configuredApiUrl
+  ? `${configuredApiUrl.replace(/\/$/, "")}${configuredApiUrl.replace(/\/$/, "").endsWith("/api") ? "" : "/api"}`
+  : "";
 
 function requireApiUrl() {
   if (!API_URL) {
