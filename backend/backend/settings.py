@@ -19,6 +19,8 @@ ALLOWED_HOSTS = [
     ).split(",")
     if host.strip()
 ]
+if ".onrender.com" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(".onrender.com")
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
@@ -87,6 +89,8 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS",
     "http://localhost:3000,http://localhost:5173,http://localhost:8080,http://localhost:8081",
 ).split(",")
+if "https://interview-buddy.prachisarnobatsarnobat.workers.dev" not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append("https://interview-buddy.prachisarnobatsarnobat.workers.dev")
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get(
     "CSRF_TRUSTED_ORIGINS",
     "http://localhost:3000,http://localhost:5173,http://localhost:8080,http://localhost:8081",
