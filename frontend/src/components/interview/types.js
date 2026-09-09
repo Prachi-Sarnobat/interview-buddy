@@ -1,3 +1,5 @@
+import { backendRequest } from "@/lib/backend";
+
 export const STAGES = [{
   id: "html-css",
   name: "HTML & CSS",
@@ -76,11 +78,9 @@ function pick(arr, n) {
   return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
 }
 
-/** Placeholder evaluator — swap for a Django REST call later. */
 export async function evaluateAnswer(question, transcript, sessionId, order = 0) {
-  const response = await fetch(`${import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000/api"}/evaluate/`, {
+  return backendRequest("/evaluate/", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       session_id: sessionId,
       question_id: question.id,
@@ -90,7 +90,4 @@ export async function evaluateAnswer(question, transcript, sessionId, order = 0)
       order
     })
   });
-  const result = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(result?.detail ?? "Answer evaluation failed.");
-  return result;
 }
