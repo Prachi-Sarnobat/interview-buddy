@@ -1,331 +1,109 @@
-🎯 Interview Buddy
-AI-powered interview practice platform with real-time webcam proctoring, automated scoring, and instant AI feedback.
+# Interview Buddy
 
-✨ Features
-🎥 Live Webcam Proctoring — Real-time video capture with proctoring events to detect suspicious activity
-🤖 AI-Powered Evaluation — Automated scoring of interview responses using OpenAI or Gemini
-📊 Detailed Score Breakdown — Visual score ring with category-wise feedback
-📝 Question Cards — Structured interview questions with a guided flow
-🔐 Consent & Review — Pre-interview consent screen and post-interview review page
-🔒 Secure Authentication — Supabase-powered auth with session management
-📱 Responsive Design — Works seamlessly across desktop and mobile devices
-🛠️ Tech Stack
-Frontend
-Technology	Purpose
-React 19	UI framework
-TanStack Start	Full-stack React framework (SSR)
-Vite	Build tool & dev server
-Tailwind CSS 4	Styling
-Radix UI	Accessible component library
-TanStack Router	Type-safe routing
-TanStack Query	Data fetching & caching
-Supabase	Authentication & session management
-Backend
-Technology	Purpose
-Django 6	Web framework
-Django REST Framework	REST API
-django-cors-headers	Cross-origin support
-SQLite	Database (easily swappable to PostgreSQL)
-Gunicorn	Production WSGI server
-AI Evaluation
-Provider	Model
-OpenAI	GPT-4o-mini
-Google Gemini	Gemini 1.5 Flash
-Mock	Built-in mock evaluator for testing
-Infrastructure
-Service	Purpose
-Cloudflare Workers	Frontend hosting (SSR)
-Render	Backend hosting (Django + Gunicorn)
-GitHub	Version control & CI/CD via Cloudflare Builds
-🏗️ Architecture
+An AI-powered mock interview platform that runs a full-stack developer through a live, voice-based technical interview — asking questions out loud, listening to spoken answers, and scoring each response with real AI feedback.
+
+**Live app:** https://interview-buddy.prachisarnobatsarnobat.workers.dev
+
+## What it does
+
+- Runs a **fixed full-stack interview sequence**: HTML & CSS → React.js → Python → Node.js/Django & PostgreSQL
+- The AI interviewer **speaks each question aloud** (text-to-speech) and **listens to the candidate's spoken answer**, auto-submitting once it detects a pause — no typing, no "done" button
+- **Webcam and screen-share** stay active during the interview, with tab-switch detection, in the style of proctored technical interviews
+- Every question, transcript, and AI evaluation is **recorded** to the candidate's session
+- **Feedback is withheld until the end** of the interview — no score is shown after individual answers, only in the final summary — to keep the experience closer to a real interview
+- Each answer is graded by a real AI model (not a rule-based scorer): score out of 10, a verdict, strengths, and areas to improve
+
+## Tech stack
+
+**Frontend**
+- React 19 + [TanStack Start](https://tanstack.com/start) (file-based routing, SSR)
+- Plain JavaScript/JSX — no TypeScript
+- Tailwind CSS
+- Deployed on **Cloudflare Workers**
+
+**Backend**
+- Django + Django REST Framework
+- AI evaluation via the OpenAI API (provider is swappable — Gemini supported too)
+- SQLite (dev) — deployed on **Render**
+
+## Project structure
+
+```
 interview-buddy/
-├── frontend/                # TanStack Start + React frontend
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── interview/   # Interview flow components
-│   │   │   │   ├── ConsentScreen.jsx
-│   │   │   │   ├── InterviewFlow.jsx
-│   │   │   │   ├── QuestionCard.jsx
-│   │   │   │   ├── ScoreRing.jsx
-│   │   │   │   └── WebcamTile.jsx
-│   │   │   └── ui/          # Reusable UI components (Radix-based)
-│   │   ├── routes/         # TanStack Router routes
-│   │   ├── lib/             # Backend API client & utilities
-│   │   ├── integrations/    # Supabase client & auth
-│   │   └── hooks/           # Custom React hooks
-│   ├── vite.config.js
-│   └── package.json
-├── backend/                # Django REST API
-│   ├── backend/             # Django project settings
-│   ├── interview/           # Interview app (models, views, AI eval)
-│   ├── manage.py
-│   ├── requirements.txt
-│   └── wsgi.py
-└── README.md
-🚀 Live Demo
-Frontend (Cloudflare Workers): https://interview-buddy.prachisarnobatsarnobat.workers.dev
-Backend API (Render): https://interview-buddy-gls4.onrender.com/api/
-🔧 Local Development
-Prerequisites
-Node.js 18+ and Bun
-Python 3.11+
-Git
-Frontend Setup
-cd frontend
-bun install
-Create a .env file in the frontend/ directory:
+├── frontend/                 # React + TanStack Start app
+│   └── src/
+│       ├── components/
+│       │   └── interview/    # WebcamTile, QuestionCard, InterviewFlow, etc.
+│       └── routes/
+└── backend/                  # Django REST Framework API
+    ├── config/                # settings, urls
+    └── interview/              # sessions, evaluation, AI integration
+        ├── models.py            # InterviewSession, QAExchange
+        ├── ai.py                # AI provider call (OpenAI/Gemini)
+        └── views.py
+```
 
-VITE_API_URL=http://localhost:8000
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
-VITE_SUPABASE_PROJECT_ID=your_supabase_project_id
-Start the dev server:
-
-bun run dev
-Backend Setup
-cd backend
-python -m venv venv
-source venv/bin/activate    # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-Create a .env file in the backend/ directory:
-
-DJANGO_SECRET_KEY=your_secret_key
-DJANGO_DEBUG=1
-DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
-AI_PROVIDER=mock
-Run migrations and start the server:
-
-python manage.py migrate
-python manage.py runserver
-📡 API Endpoints
-Method	Endpoint	Description
-GET	/api/	API root
-GET	/api/sessions/	List interview sessions
-POST	/api/sessions/	Create a new interview session
-GET	/api/sessions/{id}/	Retrieve a specific session
-POST	/api/sessions/{id}/evaluate/	Submit answers for AI evaluation
-🧠 How It Works
-Consent — User grants webcam access and agrees to proctoring terms
-Interview Flow — Questions are presented one at a time with a live webcam feed
-Proctoring — The system monitors for suspicious activity during the session
-Submission — Answers are submitted to the backend for AI evaluation
-Scoring — AI evaluates responses and returns a score with category-wise feedback
-Review — User reviews their performance with a detailed score breakdown
-🔐 Environment Variables
-Frontend (Cloudflare Build Settings)
-Variable	Description
-VITE_API_URL	Backend API base URL
-VITE_SUPABASE_URL	Supabase project URL
-VITE_SUPABASE_PUBLISHABLE_KEY	Supabase publishable (anon) key
-VITE_SUPABASE_PROJECT_ID	Supabase project ID
-Backend (Render Environment)
-Variable	Description
-DJANGO_SECRET_KEY	Django secret key
-DJANGO_DEBUG	Debug mode (0 or 1)
-DJANGO_ALLOWED_HOSTS	Comma-separated allowed hosts
-CORS_ALLOWED_ORIGINS	Comma-separated allowed origins
-AI_PROVIDER	AI evaluator: mock, openai, or gemini
-OPENAI_API_KEY	OpenAI API key (if using OpenAI)
-GEMINI_API_KEY	Gemini API key (if using Gemini)
-📦 Deployment
-Frontend → Cloudflare Workers
-Connected to GitHub repo via Cloudflare Builds
-Auto-deploys on push to main branch
-Build command: bun install && bun run build
-Deploy command: npx wrangler deploy
-Backend → Render
-Connected to GitHub repo
-Auto-deploys on push to main branch
-Build command: pip install -r requirements.txt && python manage.py migrate
-Start command: gunicorn backend.wsgi:application
-👩‍💻 Author
-Prachi Sarnobat
-
-GitHub: @Prachi-Sarnobat
-📄 License
-This project is licensed under the MIT License.
-
-To use this, create or replace the README.md file at the root of your repo with this content, then:
-
-git add README.md
-git commit -m "update README for recruiters"
-git push origin main
-Want me to adjust anything — like adding a demo screenshot section, badges, or more detail on the AI evaluation logic?
-
->> 
-On branch main
-Your branch is up to date with 'origin/main'.
-
-nothing to commit, working tree clean
-Everything up-to-date
-
-
-See reasoning
-Agent
-You need to create the README.md file first. You're in the frontend folder, but the README should be at the repo root. Run this:
-
-cd ..
-Then create the file:
-
-@"
-# 🎯 Interview Buddy
-
-> AI-powered interview practice platform with real-time webcam proctoring, automated scoring, and instant AI feedback.
-
-## ✨ Features
-
-- 🎥 **Live Webcam Proctoring** — Real-time video capture with proctoring events to detect suspicious activity
-- 🤖 **AI-Powered Evaluation** — Automated scoring of interview responses using OpenAI or Gemini
-- 📊 **Detailed Score Breakdown** — Visual score ring with category-wise feedback
-- 📝 **Question Cards** — Structured interview questions with a guided flow
-- 🔐 **Consent & Review** — Pre-interview consent screen and post-interview review page
-- 🔒 **Secure Authentication** — Supabase-powered auth with session management
-- 📱 **Responsive Design** — Works seamlessly across desktop and mobile devices
-
-## 🛠️ Tech Stack
+## Getting started
 
 ### Frontend
-| Technology | Purpose |
-|---|---|
-| **React 19** | UI framework |
-| **TanStack Start** | Full-stack React framework (SSR) |
-| **Vite** | Build tool & dev server |
-| **Tailwind CSS 4** | Styling |
-| **Radix UI** | Accessible component library |
-| **TanStack Router** | Type-safe routing |
-| **TanStack Query** | Data fetching & caching |
-| **Supabase** | Authentication & session management |
 
-### Backend
-| Technology | Purpose |
-|---|---|
-| **Django 6** | Web framework |
-| **Django REST Framework** | REST API |
-| **django-cors-headers** | Cross-origin support |
-| **SQLite** | Database (easily swappable to PostgreSQL) |
-| **Gunicorn** | Production WSGI server |
-
-### AI Evaluation
-| Provider | Model |
-|---|---|
-| **OpenAI** | GPT-4o-mini |
-| **Google Gemini** | Gemini 1.5 Flash |
-| **Mock** | Built-in mock evaluator for testing |
-
-### Infrastructure
-| Service | Purpose |
-|---|---|
-| **Cloudflare Workers** | Frontend hosting (SSR) |
-| **Render** | Backend hosting (Django + Gunicorn) |
-| **GitHub** | Version control & CI/CD via Cloudflare Builds |
-
-## 🏗️ Architecture
-
-``````interview-buddy/
-├── frontend/                # TanStack Start + React frontend
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── interview/   # Interview flow components
-│   │   │   │   ├── ConsentScreen.jsx
-│   │   │   │   ├── InterviewFlow.jsx
-│   │   │   │   ├── QuestionCard.jsx
-│   │   │   │   ├── ScoreRing.jsx
-│   │   │   │   └── WebcamTile.jsx
-│   │   │   └── ui/          # Reusable UI components (Radix-based)
-│   │   ├── routes/         # TanStack Router routes
-│   │   ├── lib/             # Backend API client & utilities
-│   │   ├── integrations/    # Supabase client & auth
-│   │   └── hooks/           # Custom React hooks
-│   ├── vite.config.js
-│   └── package.json
-├── backend/                # Django REST API
-│   ├── backend/             # Django project settings
-│   ├── interview/           # Interview app (models, views, AI eval)
-│   ├── manage.py
-│   ├── requirements.txt
-│   └── wsgi.py
-└── README.md
-🚀 Live Demo
-Frontend (Cloudflare Workers): https://interview-buddy.prachisarnobatsarnobat.workers.dev
-Backend API (Render): https://interview-buddy-gls4.onrender.com/api/
-🔧 Local Development
-Prerequisites
-Node.js 18+ and Bun
-Python 3.11+
-Git
-Frontend Setup
+```bash
 cd frontend
 bun install
-Create a .env file in the frontend/ directory:
+bun dev
+```
 
-VITE_API_URL=http://localhost:8000
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
-VITE_SUPABASE_PROJECT_ID=your_supabase_project_id
-Start the dev server:
+Runs at `http://localhost:3000` (or similar — check terminal output).
 
-bun run dev
-Backend Setup
+### Backend
+
+```bash
 cd backend
-python -m venv venv
-source venv/bin/activate    # On Windows: venv\Scripts\activate
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-Create a .env file in the backend/ directory:
-
-DJANGO_SECRET_KEY=your_secret_key
-DJANGO_DEBUG=1
-DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
-AI_PROVIDER=mock
-Run migrations and start the server:
-
+cp .env.example .env        # then add your OPENAI_API_KEY
 python manage.py migrate
 python manage.py runserver
-📡 API Endpoints
-Method	Endpoint	Description
-GET	/api/	API root
-GET	/api/sessions/	List interview sessions
-POST	/api/sessions/	Create a new interview session
-GET	/api/sessions/{id}/	Retrieve a specific session
-POST	/api/sessions/{id}/evaluate/	Submit answers for AI evaluation
-🧠 How It Works
-Consent — User grants webcam access and agrees to proctoring terms
-Interview Flow — Questions are presented one at a time with a live webcam feed
-Proctoring — The system monitors for suspicious activity during the session
-Submission — Answers are submitted to the backend for AI evaluation
-Scoring — AI evaluates responses and returns a score with category-wise feedback
-Review — User reviews their performance with a detailed score breakdown
-🔐 Environment Variables
-Frontend (Cloudflare Build Settings)
-Variable	Description
-VITE_API_URL	Backend API base URL
-VITE_SUPABASE_URL	Supabase project URL
-VITE_SUPABASE_PUBLISHABLE_KEY	Supabase publishable (anon) key
-VITE_SUPABASE_PROJECT_ID	Supabase project ID
-Backend (Render Environment)
-Variable	Description
-DJANGO_SECRET_KEY	Django secret key
-DJANGO_DEBUG	Debug mode (0 or 1)
-DJANGO_ALLOWED_HOSTS	Comma-separated allowed hosts
-CORS_ALLOWED_ORIGINS	Comma-separated allowed origins
-AI_PROVIDER	AI evaluator: mock, openai, or gemini
-OPENAI_API_KEY	OpenAI API key (if using OpenAI)
-GEMINI_API_KEY	Gemini API key (if using Gemini)
-📦 Deployment
-Frontend → Cloudflare Workers
-Connected to GitHub repo via Cloudflare Builds
-Auto-deploys on push to main branch
-Build command: bun install && bun run build
-Deploy command: npx wrangler deploy
-Backend → Render
-Connected to GitHub repo
-Auto-deploys on push to main branch
-Build command: pip install -r requirements.txt && python manage.py migrate
-Start command: gunicorn backend.wsgi:application
-👩‍💻 Author
-Prachi Sarnobat
+```
 
-GitHub: @Prachi-Sarnobat
-📄 License
-This project is licensed under the MIT License. "@ | Set-Content -Path "README.md" -Encoding utf8
+Runs at `http://localhost:8000`.
+
+## Environment variables
+
+**Frontend** (`frontend/.env` or your host's build variables):
+
+| Variable | Description |
+|---|---|
+| `VITE_API_URL` | URL of the deployed backend, e.g. `https://interview-buddy-api.onrender.com` |
+
+**Backend** (`backend/.env`):
+
+| Variable | Description |
+|---|---|
+| `AI_PROVIDER` | `openai` or `gemini` |
+| `OPENAI_API_KEY` | Your OpenAI API key |
+| `OPENAI_MODEL` | Defaults to `gpt-4o-mini` |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins |
+| `DJANGO_SECRET_KEY` | Any random string |
+| `DJANGO_DEBUG` | `0` in production |
+
+## API overview
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/sessions/` | Start a new interview session |
+| `PATCH` | `/api/sessions/<id>/` | Update session (e.g. end time, tab-switch count) |
+| `GET` | `/api/sessions/` | List past sessions |
+| `POST` | `/api/evaluate/` | Evaluate one answer via AI — returns score, verdict, strengths, improvements |
+| `GET`/`POST` | `/api/sessions/<id>/qa-history/` | Fetch or bulk-save a session's full Q&A history |
+
+## Deployment
+
+- **Frontend:** Cloudflare Workers, via `bun run build && npx wrangler deploy`
+- **Backend:** Render, via `gunicorn config.wsgi`
+
+## Roadmap / ideas
+
+- [ ] Support for additional interview tracks beyond full-stack web
+- [ ] Persist and visualize score trends across multiple sessions
+- [ ] Detect AI-assisted answers during the interview
